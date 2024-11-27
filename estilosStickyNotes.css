@@ -1,0 +1,198 @@
+@import url('https://fonts.googleapis.com/css2?family=Reenie+Beanie&display=swap');
+
+
+
+
+/* Estilos generales */
+
+
+body {
+    background: url('images/post-it-2010489_1280-removebg-preview.png')no-repeat center center fixed, #2c5f2d;
+    background-size: contain;
+    font-family: 'Poppins', sans-serif;
+    color: rgb(255, 255, 255);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Título */
+h1 {
+    justify-content: center;
+    font-size: 2.5rem;
+    margin: 20px 0;
+    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+/* Botón de añadir nota */
+#añadirNota {
+    background-color: #ff9800;
+    color: #fff;
+    border: none;
+    border-radius: 50px;
+    padding: 15px 20px;
+    font-size: 2rem;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin-bottom: 20px;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#añadirNota:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(255, 152, 0, 0.6);
+}
+
+#añadirNota:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 10px rgba(255, 152, 0, 0.3);
+}
+
+.fechaCreacion, .fechaModificacion {
+    color: #0077BE;
+    font-weight: bold;
+}
+/* Notas */
+.nota {
+
+    background: #fffb7d;
+    padding: 15px;
+    border-radius: 10px;
+    width: 200px;
+    min-height: 150px;
+    box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.1), 0 0 10px rgba(255, 255, 255, 0.4);
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    font-family: "Reenie Beanie", arial, sans-serif;
+    border: 1px solid #e1e1e1;
+    cursor: grab;
+}
+
+.nota:hover {
+    transform: rotate(+3deg);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+}
+.nota:active{
+    transform: rotate(+6deg);
+}
+
+/* Área de texto */
+.espacioDeNotas {
+    width: 100%;
+    height: 120px;
+    border: none;
+    resize: none;
+    border-radius: 5px;
+    padding: 8px;
+    font-size: 2rem;
+    margin-bottom: 10px;
+    outline: none;
+    background-color: #fffb7d;
+    color: rgba(5, 62, 246, 0.7);
+    font-family: inherit;
+}
+
+/* Botón de eliminar */
+.borrar-nota {
+    background-color: #e53935;
+    color: #fff;
+    border: none;
+    padding: 6px;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    align-self: flex-end;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    box-shadow: 0 4px 10px rgba(229, 57, 53, 0.4);
+}
+
+.borrar-nota:hover {
+    background-color: #c62828;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(229, 57, 53, 0.6);
+}
+
+.borrar-nota:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 8px rgba(229, 57, 53, 0.3);
+}
+
+/* Scroll personalizado para el contenedor */
+#contenedorNotas::-webkit-scrollbar {
+    width: 8px;
+}
+
+#contenedorNotas::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 5px;
+}
+
+#contenedorNotas::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+#contenedorNotas::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+/* Media Queries para diseño responsivo */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2rem;
+    }
+
+    #contenedorNotas {
+        height: 60vh;
+        width: 95%;
+    }
+
+    #añadirNota {
+        font-size: 0.9rem;
+        padding: 12px 25px;
+    }
+
+    .nota {
+        width: 180px;
+        min-height: 140px;
+    }
+
+    .espacioDeNotas {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    #contenedorNotas {
+        height: 55vh;
+    }
+
+    #añadirNota {
+        font-size: 0.8rem;
+        padding: 10px 20px;
+    }
+
+    .nota {
+        width: 160px;
+        min-height: 120px;
+    }
+
+    .espacioDeNotas {
+        font-size: 0.85rem;
+    }
+}
