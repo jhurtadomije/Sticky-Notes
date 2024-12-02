@@ -104,6 +104,12 @@ h1 {
     font-family: inherit;
 }
 
+.tiempoTranscurrido {
+    color: blue;
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
 /* Botón de eliminar */
 .borrar-nota {
     background-color: #e53935;

@@ -1,31 +1,37 @@
-
-
-function crearNota(content = "", timestamp = Date.now()) {
+function crearNota(title = "Sin Título", content = "", timestamp = Date.now()) {
     const nota = document.createElement("div");
     nota.classList.add("nota");
     nota.setAttribute("draggable", "true");
 
-    let fechaCreacion = new Date(timestamp);
-    let fechaCreacionFormat = fechaCreacion.toLocaleString();
-    let fechaModificacionFormat = fechaCreacionFormat; // Inicialmente igual a la fecha de creación
+    const fechaCreacion = new Date(timestamp);
+    const fechaCreacionFormat = fechaCreacion.toLocaleString();
+    const fechaModificacionFormat = fechaCreacionFormat; // Inicialmente igual a la fecha de creación
 
-    nota.innerHTML = `<textarea class="espacioDeNotas">${content}</textarea>
+    nota.innerHTML = `<input type="text" class="tituloDeNotas" value="${title}" placeholder="Título">
+                      <textarea class="espacioDeNotas">${content}</textarea>
                       <div class="fechas"> 
                         <div class="fechaCreacion">Creado: ${fechaCreacionFormat}</div> 
                         <div class="fechaModificacion">Modificado: ${fechaModificacionFormat}</div> 
+                        <div class="tiempoTranscurrido">Tiempo transcurrido: 0 minutos</div>
                       </div>
                       <button class="borrar-nota">Eliminar</button>`;
 
     const textarea = nota.querySelector(".espacioDeNotas");
+    const titulo = nota.querySelector(".tituloDeNotas");
     const fechaModificacionElement = nota.querySelector(".fechaModificacion");
+    const tiempoTranscurridoElement = nota.querySelector(".tiempoTranscurrido");
 
-    // Actualizamos la fecha de modificación cuando el textarea se modifique
-    textarea.addEventListener("input", () => {
+    // Actualizamos la fecha de modificación cuando el textarea o el título se modifiquen
+    const actualizarFechaModificacion = () => {
         const nuevaFechaModificacion = new Date().toLocaleString();
         fechaModificacionElement.textContent = `Modificado: ${nuevaFechaModificacion}`;
         guardarNotas();
-    });
+    };
 
+    textarea.addEventListener("input", actualizarFechaModificacion);
+    titulo.addEventListener("input", actualizarFechaModificacion);
+
+    // Evento para ajustar el tamaño de la nota
     textarea.addEventListener("mouseup", () => {
         nota.style.width = `${textarea.offsetWidth}px`;
         nota.style.height = `${textarea.offsetHeight + 30}px`;
@@ -48,45 +54,41 @@ function crearNota(content = "", timestamp = Date.now()) {
         nota.style.opacity = "1";
     });
 
+    // Actualizamos el tiempo transcurrido desde la creación
+    const actualizarTiempoTranscurrido = () => {
+        const ahora = new Date();
+        const minutosTranscurridos = Math.floor((ahora - fechaCreacion) / 60000);
+        tiempoTranscurridoElement.textContent = `Tiempo transcurrido: ${minutosTranscurridos} minutos`;
+    };
+
+    actualizarTiempoTranscurrido();
+    setInterval(actualizarTiempoTranscurrido, 60000); // Actualiza cada minuto
+
     nota.id = `nota-${timestamp}`;
     return nota;
 }
-
-
-// Funcion que se encarga de evitar que las notas se superpongan unas con otras.
-function obtenerPosicionNota() {
-    const espacioNotas = document.querySelectorAll(".nota");
-
-    //creamos la nota en una posicion inicial.
-    let x = 20;
-    let y = 20;
-
-    //incrementamos la posicion para evitar que al crear una nueva, aparezca encima de la anterior
-    espacioNotas.forEach(nota => {
-        const coordNotas = nota.getBoundingClientRect(); // devuelve un objeto con información sobre el tamaño y posición de un elemento relativo a la ventana del navegador
-
-                //comprobamos la posicion
-        if(coordNotas.left === x && coordNotas.top === y) {
-            x += 20; //incrementamos en el eje x y en el eje y
-            y += 20;
-        }
-
-    });
-    return {x, y};
-}
-
-
 
 // Función para guardar las notas en el LocalStorage
 function guardarNotas() {
     const notas = [];
     document.querySelectorAll(".nota").forEach((nota) => {
-        const textarea = nota.querySelector(".espacioDeNotas");
-        const fechaCreacion = nota.querySelector(".fechaCreacion").textContent.split(": ")[1];
-        const fechaModificacion = nota.querySelector(".fechaModificacion").textContent.split(": ")[1];
+        const titulo = nota.querySelector(".tituloDeNotas").value;
+        const textarea = nota.querySelector(".espacioDeNotas").value;
+        const fechaCreacionElement = nota.querySelector(".fechaCreacion");
+        const fechaModificacionElement = nota.querySelector(".fechaModificacion");
+
+        if (!fechaCreacionElement || !fechaModificacionElement) {
+            console.warn('Falta el elemento de fecha en la nota:', nota);
+            return;
+        }
+
+        const fechaCreacion = fechaCreacionElement.textContent.split(": ")[1] || new Date().toLocaleString();
+        const fechaModificacion = fechaModificacionElement.textContent.split(": ")[1] || new Date().toLocaleString();
         const rect = nota.getBoundingClientRect();
+
         notas.push({
-            content: textarea.value,
+            titulo: titulo,
+            contenido: textarea,
             left: rect.left,
             top: rect.top,
             fechaCreacion: fechaCreacion,
@@ -94,39 +96,49 @@ function guardarNotas() {
             id: nota.id
         });
     });
+
     localStorage.setItem("stickyNotes", JSON.stringify(notas));
 }
-
 
 // Función para cargar las notas desde el LocalStorage
 function cargarNotas() {
     const notasGuardadas = JSON.parse(localStorage.getItem("stickyNotes")) || [];
     notasGuardadas.forEach((datos) => {
-        const nota = crearNota(datos.content, parseInt(datos.id.split('-')[1]));
+        if (!datos.titulo || !datos.contenido || !datos.id || !datos.left || !datos.top) {
+            console.warn('Datos incompletos:', datos);
+            return;
+        }
+
+        const nota = crearNota(datos.titulo, datos.contenido, parseInt(datos.id.split('-')[1]));
         document.body.appendChild(nota);
         nota.style.position = "absolute";
         nota.style.left = `${datos.left}px`;
         nota.style.top = `${datos.top}px`;
 
-        // Actualizar las fechas guardadas
-        nota.querySelector(".fechaCreacion").textContent = `Creado: ${datos.fechaCreacion}`;
-        nota.querySelector(".fechaModificacion").textContent = `Modificado: ${datos.fechaModificacion}`;
+        // Actualizar las fechas guardadas, asegurarse de que las fechas existen antes de acceder a ellas
+        if (datos.fechaCreacion && datos.fechaModificacion) {
+            nota.querySelector(".fechaCreacion").textContent = `Creado: ${datos.fechaCreacion}`;
+            nota.querySelector(".fechaModificacion").textContent = `Modificado: ${datos.fechaModificacion}`;
+        } else {
+            console.warn(`Datos incompletos para la nota con id ${datos.id}`);
+            nota.querySelector(".fechaCreacion").textContent = `Creado: Desconocido`;
+            nota.querySelector(".fechaModificacion").textContent = `Modificado: Desconocido`;
+        }
     });
 }
 
-
-
+// Función para permitir el arrastre de notas
 function allowDrop(event) {
     event.preventDefault();
 }
 
-function drop(event){
+// Función para soltar notas en una nueva posición
+function drop(event) {
     event.preventDefault();
     const id = event.dataTransfer.getData("text/plain");
     const nota = document.getElementById(id);
     const x = event.clientX;
     const y = event.clientY;
-
 
     nota.style.position = "absolute";
     nota.style.left = `${x}px`;
@@ -135,18 +147,19 @@ function drop(event){
     guardarNotas();
 }
 
-
+// Inicialización de la aplicación
 window.onload = function () {
     const agregarNota = document.getElementById("añadirNota");
 
     document.body.addEventListener("dragover", allowDrop);
     document.body.addEventListener("drop", drop);
+
     // Cargamos notas al iniciar la página
     cargarNotas();
 
     // Evento para añadir una nueva nota
     agregarNota.addEventListener("click", () => {
-        const nota = crearNota("", Date.now());
+        const nota = crearNota("Sin Título", "", Date.now());
         document.body.appendChild(nota);
         // Guardamos las notas solo después de añadir una nueva
         guardarNotas();
